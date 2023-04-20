@@ -42,6 +42,7 @@ public class ServerMT extends Thread{
     }
     class Conversation extends Thread{
         int num;
+        private boolean connected=true;
         private Socket socket;
         public Conversation(Socket socket,int num){
             this.socket = socket; this.num = num;
@@ -50,31 +51,29 @@ public class ServerMT extends Thread{
         public void run() {
             try {
                 InputStream is = socket.getInputStream();
-                InputStreamReader isr = new InputStreamReader(is);// lire une chaine de caractere
-                // Input stream lit ocktet par ocktet et l'envoie vers BufferdReader
+                InputStreamReader isr = new InputStreamReader(is);
                 BufferedReader bfr = new BufferedReader(isr);
-                // buffredReader va lire une chaine de caractere
-                OutputStream os = socket.getOutputStream(); // Pur envoyer la reponse
-                /*
-                    le parametre boolean true designe que je vais lire ligne par ligne
-                    si il est mis a false c a d je ne peux lire que lorsque j'appele la methode flush
-                */
+                OutputStream os = socket.getOutputStream();
                 PrintWriter pw = new PrintWriter(os,true);
-                
-                System.out.println("Connexion du client numero "+num); // affichage sur le serveur
+
+                System.out.println("Connexion du client numero "+num);
                 String ip = socket.getRemoteSocketAddress().toString();
-                pw.println("Bienvenue vous etes le client numero "+num+" IP adresse : "+ip);// j'envoie au client
-                while (true) {
-                    String requete = bfr.readLine();
-                    System.out.println("Le client "+ip+" a envoye la requete "+requete);
-                    pw.println(requete.length());
+                pw.println("Bienvenue vous etes le client numero "+num+" IP adresse : "+ip);
+                String requete;
+                while (connected && (requete = bfr.readLine()) != null) {
+                    if(requete.equals("exit")){
+                        connected = false;
+                        System.out.println("Le client "+ip+" s'est deconnecte");
+                    }
+                    else{
+                        System.out.println("Le client "+ip+" a envoye la requete "+requete);
+                        pw.println("La longueur de votre message est "+requete.length());
+                    }
                 }
+                socket.close(); // fermer le socket une fois la communication terminée
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-        
-    }
-    
-    
+          }
+} 
 }
