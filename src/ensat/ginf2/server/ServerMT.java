@@ -14,6 +14,7 @@ import java.util.*;
  * @author ahmed
  */
 public class ServerMT extends Thread{
+    private boolean active=true;
     int nbr_client;
     public static void main(String[] args) {
         // l'appel de la methode start() va executer la methode run()
@@ -25,9 +26,9 @@ public class ServerMT extends Thread{
     public void run() {
         ServerSocket ss;
         try {
-            ss = new ServerSocket(1232);
+            ss = new ServerSocket(1232); // tcp
             System.out.println("Demarrage du serveur...");
-            while(true){
+            while(active){
            Socket socket = ss.accept();
            ++nbr_client;
            new Conversation(socket,nbr_client).start();
